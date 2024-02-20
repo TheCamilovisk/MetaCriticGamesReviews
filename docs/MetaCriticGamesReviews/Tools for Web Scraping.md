@@ -55,7 +55,15 @@ This table highlights the primary use, ease of use, support for dynamic content,
 | LXML            | HTML/XML parsing               | High        | No                          | Good                  | Manual compliance         |
 | Pandas          | Data analysis (HTML tables)    | High        | No                          | Excellent             | Manual compliance         |
 | PyQuery         | HTML/XML parsing               | High        | No                          | Good                  | Manual compliance         |
-# Veredit
-We'll go for ease of use and flexibility using a combination of the requests and beatifulsoap libraries.
-Scrapy could be an option, but it's too complex, and as a framework by nature, it' meant to be run as a standalone application.
-Scrapy works best as an automation tool for interact with websites, and we don't need this for this project.
+# Chosen tools
+Requests and Beautiful Soup are highly compatible with each other. Requests is used to make HTTP requests to web pages, effectively fetching the HTML content of any website. Beautiful Soup, on the other hand, is a powerful HTML and XML parsing library. It allows for easy navigation, searching, and modification of the parse tree. Once Requests has fetched the webpage, Beautiful Soup can parse the content and extract the necessary data. This seamless integration between fetching and parsing operations makes the combination of Requests and Beautiful Soup a go-to choice for many developers.
+## Pros
+1. **Ease of Use**: Both libraries have a gentle learning curve, making them accessible to beginners and efficient for experienced developers.
+2. **Flexibility**: This combination allows for scraping both simple and moderately complex websites by handling various HTML/XML structures.
+3. **Community Support**: With extensive documentation and a large community, finding solutions to common problems is easier, accelerating development.
+4. **Efficiency in Parsing**: Beautiful Soup provides several methods to navigate the parse tree, which can significantly speed up the scraping process when combined with the efficient HTTP requests made by Requests.
+## Cons:
+1. **Dynamic Content Handling**: The major limitation of using Requests and Beautiful Soup is their inability to scrape dynamic content loaded by JavaScript. This can be a significant drawback when dealing with modern web applications that rely heavily on JavaScript for rendering content.
+2. **Speed**: While suitable for many projects, this combination may not be as fast as other frameworks like Scrapy, especially for large-scale web scraping tasks, due to the lack of built-in concurrency features.
+3. **Manual Handling of Scraping Ethics**: There's a need for manual implementation of ethical scraping practices, such as respecting robots.txt files and managing request rates, which can add complexity to the project.
+Given the project's scope and requirements, the combination of Requests and Beautiful Soup is highly effective, offering a straightforward and efficient approach to web scraping. The primary limitation to consider is the potential impact on performance with very large-scale tasks, but for many projects, especially those dealing with static content and adhering to ethical guidelines, this combination is both practical and powerful.
