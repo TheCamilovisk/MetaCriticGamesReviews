@@ -55,3 +55,7 @@ This table highlights the primary use, ease of use, support for dynamic content,
 | LXML            | HTML/XML parsing               | High        | No                          | Good                  | Manual compliance         |
 | Pandas          | Data analysis (HTML tables)    | High        | No                          | Excellent             | Manual compliance         |
 | PyQuery         | HTML/XML parsing               | High        | No                          | Good                  | Manual compliance         |
+# Veredit
+We'll go for ease of use and flexibility using a combination of the requests and beatifulsoap libraries.
+Scrapy could be an option, but it's too complex, and as a framework by nature, it' meant to be run as a standalone application.
+Scrapy works best as an automation tool for interact with websites, and we don't need this for this project.
