@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 from typing import List
 
 
@@ -42,3 +43,23 @@ class GameInfo:
     users_score: float
     critics_reviews_link: str
     users_reviews_link: str
+
+
+@dataclass(frozen=True)
+class GameReview:
+    """
+    Represents a game review.
+
+    Attributes:
+        username (str): The username of the individual who submitted the review.
+        date (datetime): The date when the review was posted. Expected to be a datetime object.
+        score (int): The score given to the game by the reviewer, typically on a scale from 0 to 10.
+        quote (str): The text of the review submitted by the user.
+        review_platform (str): The platform for which the review was written (e.g., PC, PS4, Xbox One).
+    """
+
+    username: str
+    date: datetime
+    score: int
+    quote: str
+    review_platform: str
