@@ -46,11 +46,11 @@ class TestBestGames(unittest.TestCase):
         mock_get.return_value.status_code = 404
         mock_get.return_value.text = "Not Found"
 
-        try:
+        with self.assertRaises(HTTPError) as context:
             get_best_games_list()
-        except HTTPError as e:
-            status_code = e.response.status_code
-            self.assertEqual(status_code, 404, "Page not found handled gracefully")
+
+        status_code = context.exception.response.status_code
+        self.assertEqual(status_code, 404, "Page not found handled gracefully")
 
     @patch("scraping.extraction.requests.get")
     def test_get_games_list_server_error(self, mock_get: MagicMock) -> None:
@@ -60,8 +60,8 @@ class TestBestGames(unittest.TestCase):
         mock_get.return_value.status_code = 500
         mock_get.return_value.text = "Internal Error"
 
-        try:
+        with self.assertRaises(HTTPError) as context:
             get_best_games_list()
-        except HTTPError as e:
-            status_code = e.response.status_code
-            self.assertEqual(status_code, 500, "Server error handled gracefully")
+
+        status_code = context.exception.response.status_code
+        self.assertEqual(status_code, 500, "Server error handled gracefully")
