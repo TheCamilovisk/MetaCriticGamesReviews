@@ -3,6 +3,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from scraping.extraction import get_best_games_list
+from scraping.models import GameURL
 from tests.utils import get_resources_path, read_file
 
 
@@ -27,8 +28,8 @@ class TestBestGames(unittest.TestCase):
         mock_get.return_value.text = self.mock_page_html
 
         expected_links = [
-            "https://example.com/game1",
-            "https://example.com/game2",
+            GameURL("Game 1", "https://example.com/game1"),
+            GameURL("Game 2", "https://example.com/game2"),
         ]
         links = get_best_games_list()
 
