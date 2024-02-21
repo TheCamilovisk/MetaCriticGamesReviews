@@ -33,6 +33,7 @@ class TestBestGames(unittest.TestCase):
         ]
         links = get_best_games_list()
 
+        self.assertIsNotNone(links)
         self.assertEqual(
             links, expected_links, "Retrieved games links are the expected"
         )
