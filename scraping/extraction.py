@@ -2,7 +2,7 @@ from typing import List
 
 import requests
 
-from scraping.models import GameInfo, GameURL
+from scraping.models import GameInfo, GameReview, GameURL
 
 
 def get_best_games_list(n_pages: int = 1) -> List[GameURL]:
@@ -42,3 +42,27 @@ def get_game_info(game_page_url: str) -> GameInfo:
         when using this function.
     """
     return None
+
+
+def get_game_reviews(game_reviews_endpoint: str) -> List[GameReview]:
+    """
+    Fetches and returns a list of game reviews from a specified API endpoint.
+
+    This function contacts an API endpoint that provides game reviews in a JSON format.
+    Each review is then transformed into a GameReview object. The function handles the conversion
+    of date strings to datetime objects and ensures that the returned list contains only valid
+    GameReview instances.
+
+    Parameters:
+        game_reviews_endpoint (str): The URL of the API endpoint where game reviews can be retrieved.
+
+    Returns:
+        List[GameReview]: A list of GameReview objects containing the data for each game review
+        fetched from the API.
+
+    Raises:
+        HTTPError: If the request to the API endpoint fails or returns an error status.
+        JSONDecodeError: If the response from the API cannot be decoded as JSON.
+        ValueError: If data from the API does not conform to the expected structure or types.
+    """
+    return []
