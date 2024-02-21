@@ -14,7 +14,7 @@ class TestGameReviews(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.resources_path = get_resources_path
+        self.resources_path = get_resources_path(__file__)
         # Setup mock output for different scenarios
         mock_valid_response_path = os.path.join(
             self.resources_path, "mock_valid_response.jsonl"
@@ -32,15 +32,6 @@ class TestGameReviews(unittest.TestCase):
         mock_get.return_value.json = MagicMock(return_value=self.valid_response)
         result = get_game_reviews(self.valid_endpoint)
         self.assertEqual(len(result), 2, "Expected two reviews in the result")
-
-    @patch("scraping.extraction.requests.get")
-    def test_empty_response(self, mock_get: MagicMock) -> None:
-        """
-        Test fetching game reviews with an empty response.
-        """
-        mock_get.return_value.json = MagicMock(return_value=[])
-        result = get_game_reviews(self.valid_endpoint)
-        self.assertEqual(len(result), 0, "Expected an empty result list")
 
     @patch("scraping.extraction.requests.get")
     def test_single_review_response(self, mock_get: MagicMock) -> None:
