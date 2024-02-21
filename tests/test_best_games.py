@@ -21,8 +21,7 @@ class TestBestGames(unittest.TestCase):
     @patch("scraping.extraction.requests.get")
     def test_get_games_list_success(self, mock_get: MagicMock) -> None:
         """
-        Tests successful extraction of games listing (hrefs) from a mocked
-        webpage.
+        Tests successful extraction of games listing (hrefs) from a mocked webpage.
         """
         mock_get.return_value.status_code = 200
         mock_get.return_value.text = self.mock_page_html

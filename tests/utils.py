@@ -2,8 +2,7 @@ import os
 
 
 def get_resources_path(test_file_name: str) -> str:
-    """Constructs the path to the resources folder of the test case based on
-    the current file name.
+    """Constructs the path to the resources folder of the test case based on the current file name.
 
     Args:
         test_file_name (str): The name of the test file
