@@ -2,6 +2,8 @@ import os
 import unittest
 from unittest.mock import MagicMock, patch
 
+from requests import HTTPError
+
 from scraping.extraction import get_best_games_list
 from scraping.models import GameURL
 from tests.utils import get_resources_path, read_file
@@ -32,4 +34,34 @@ class TestBestGames(unittest.TestCase):
         ]
         links = get_best_games_list()
 
-        self.assertEqual(links, expected_links)
+        self.assertEqual(
+            links, expected_links, "Retrieved games links are the expected"
+        )
+
+    @patch("scraping.extraction.requests.get")
+    def test_get_games_list_page_not_found(self, mock_get: MagicMock) -> None:
+        """
+        Test if extraction gracefully handles HTTP response 404 Not Found.
+        """
+        mock_get.return_value.status_code = 404
+        mock_get.return_value.text = "Not Found"
+
+        try:
+            get_best_games_list()
+        except HTTPError as e:
+            status_code = e.response.status_code
+            self.assertEqual(status_code, 404, "Page not found handled gracefully")
+
+    @patch("scraping.extraction.requests.get")
+    def test_get_games_list_server_error(self, mock_get: MagicMock) -> None:
+        """
+        Test if extraction gracefully handles HTTP response 500 Server Error.
+        """
+        mock_get.return_value.status_code = 500
+        mock_get.return_value.text = "Internal Error"
+
+        try:
+            get_best_games_list()
+        except HTTPError as e:
+            status_code = e.response.status_code
+            self.assertEqual(status_code, 500, "Server error handled gracefully")
