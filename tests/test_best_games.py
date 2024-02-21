@@ -10,15 +10,14 @@ from tests.utils import get_resources_path, read_file
 
 
 class TestBestGames(unittest.TestCase):
+    """
+    Unit tests for the `get_best_games_list` function in the `scraping` module.
+    """
     def setUp(self) -> None:
         self.resources_path = get_resources_path(__file__)
 
         mock_page_path = os.path.join(self.resources_path, "mock_page.html")
         self.mock_page_html = read_file(mock_page_path)
-
-    """
-    Unit tests for the `get_best_games_list` function in the `scraping` module.
-    """
 
     @patch("scraping.extraction.requests.get")
     def test_get_games_list_success(self, mock_get: MagicMock) -> None:
