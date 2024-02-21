@@ -164,3 +164,7 @@ cython_debug/
 .obsidian/
 */.obsidian
 */.obsidian
+
+# VSCode files
+.vscode
+.vscode/
