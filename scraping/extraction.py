@@ -1,4 +1,6 @@
 import sys
+from datetime import datetime
+from requests import JSONDecodeError
 from typing import List
 
 import requests
@@ -232,4 +234,30 @@ def get_game_reviews(game_reviews_endpoint: str) -> List[GameReview]:
         JSONDecodeError: If the response from the API cannot be decoded as JSON.
         ValueError: If data from the API does not conform to the expected structure or types.
     """
-    return []
+    try:
+        response = requests.get(game_reviews_endpoint)
+        response.raise_for_status()  # Raises HTTPError for bad responses
+    except requests.exceptions.HTTPError as e:
+        raise requests.HTTPError(f"HTTP error occurred: {e}")
+    except Exception as e:
+        raise Exception(f"An error occurred: {e}")
+
+    reviews_json = response.json()
+
+    game_reviews = []
+    for review_data in reviews_json:
+        try:
+            # Ensure all data is correctly typed
+            username = str(review_data["username"])
+            date = datetime.strptime(review_data["date"], "%Y-%m-%d")
+            score = int(review_data["score"])
+            quote = str(review_data["quote"])
+            review_platform = str(review_data["review_platform"])
+
+            game_reviews.append(
+                GameReview(username, date, score, quote, review_platform)
+            )
+        except (ValueError, KeyError) as e:
+            raise ValueError(f"Error processing review data: {e}")
+
+    return game_reviews
