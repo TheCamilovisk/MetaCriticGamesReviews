@@ -1,6 +1,7 @@
 from typing import List
 
 import requests
+from bs4 import BeautifulSoup
 
 from scraping.models import GameInfo, GameReview, GameURL
 
@@ -9,12 +10,47 @@ def get_best_games_list(n_pages: int = 1) -> List[GameURL]:
     """Get the list of the best games of all time for the "n_pages" first pages in https://www.metacritic.com/browse/game/.  # noqa: E501
 
     Args:
-        n_pages (int, optional): The desired number of pages to retrieve the game URLS from. If < 0, all pages will be scraped. Defaults to 1.
+        n_pages (int, optional): The desired number of pages to retrieve the game URLS from. Defaults to 1.
 
     Returns:
         List[GameURL]: _description_
     """
-    return []
+    base_url = "https://www.metacritic.com"
+    browse_path = "/browse/games/score/metascore/all/filtered"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+    }
+
+    game_urls = []
+
+    for page in range(n_pages):
+        url = f"{base_url}{browse_path}?page={page}"
+        response = requests.get(url, headers=headers)
+
+        if response.status_code == 404:
+            raise requests.exceptions.HTTPError(f"Couldn't find {url}!")
+        elif response.status_code == 500:
+            raise requests.exceptions.ConnectionError("Internal server error!")
+
+        soup = BeautifulSoup(response.content, "html.parser")
+        game_cards = soup.find_all(
+            "div", class_="c-finderProductCard c-finderProductCard-game"
+        )
+        for game_card in game_cards:
+            anchor = game_card.find("a", class_="c-finderProductCard_container")
+            if anchor:
+                game_title = anchor.find(
+                    "div", class_="c-finderProductCard_title"
+                ).get_text(strip=True)
+                game_url = base_url + anchor["href"]
+                game_urls.append(
+                    GameURL(
+                        title=".".join(game_title.split(".")[1:]).strip(),
+                        url=game_url,
+                    )
+                )
+
+    return game_urls
 
 
 def get_game_info(game_page_url: str) -> GameInfo:
