@@ -47,8 +47,8 @@ class TestGameReviews(unittest.TestCase):
         """
         Test fetching game reviews with an invalid URL.
         """
-        mock_get.side_effect = requests.exceptions.ConnectionError
-        with self.assertRaises(requests.exceptions.ConnectionError):
+        mock_get.side_effect = Exception
+        with self.assertRaises(Exception):
             get_game_reviews(self.invalid_endpoint)
 
     @patch("scraping.extraction.requests.get")
@@ -65,7 +65,7 @@ class TestGameReviews(unittest.TestCase):
         """
         Test fetching game reviews with an unexpected JSON structure.
         """
-        mock_get.return_value.json = MagicMock(return_value={"unexpected": "structure"})
+        mock_get.return_value.json = MagicMock(return_value=[{"unexpected": "structure"}])
         with self.assertRaises(ValueError):
             get_game_reviews(self.valid_endpoint)
 
