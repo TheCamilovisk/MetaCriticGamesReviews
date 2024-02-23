@@ -2,7 +2,7 @@ import os
 import unittest
 from unittest.mock import MagicMock, patch
 
-from requests import ConnectionError
+import requests
 
 from scraping.extraction import get_best_games_list
 from scraping.models import GameURL
@@ -26,11 +26,11 @@ class TestBestGames(unittest.TestCase):
         Tests successful extraction of games listing (hrefs) from a mocked webpage.
         """
         mock_get.return_value.status_code = 200
-        mock_get.return_value.text = self.mock_page_html
+        mock_get.return_value.content = self.mock_page_html
 
         expected_links = [
-            GameURL("Game 1", "https://example.com/game1"),
-            GameURL("Game 2", "https://example.com/game2"),
+            GameURL("Game 1", "https://www.metacritic.com/game/game1/"),
+            GameURL("Game 2", "https://www.metacritic.com/game/game2/"),
         ]
         links = get_best_games_list()
 
@@ -45,9 +45,9 @@ class TestBestGames(unittest.TestCase):
         Test if extraction gracefully handles HTTP response 404 Not Found.
         """
         mock_get.return_value.status_code = 404
-        mock_get.return_value.text = "Not Found"
+        mock_get.return_value.content = "<html>404 Not Found</html>"
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(requests.exceptions.HTTPError):
             get_best_games_list()
 
     @patch("scraping.extraction.requests.get")
@@ -56,7 +56,7 @@ class TestBestGames(unittest.TestCase):
         Test if extraction gracefully handles HTTP response 500 Server Error.
         """
         mock_get.return_value.status_code = 500
-        mock_get.return_value.text = "Internal Error"
+        mock_get.return_value.content = "<html>500 Internal Error</html>"
 
-        with self.assertRaises(ConnectionError):
+        with self.assertRaises(requests.exceptions.ConnectionError):
             get_best_games_list()
