@@ -1,3 +1,4 @@
+import sys
 from typing import List
 
 import requests
@@ -53,6 +54,90 @@ def get_best_games_list(n_pages: int = 1) -> List[GameURL]:
     return game_urls
 
 
+def get_game_details(game_page_url: str) -> dict:
+    """
+    Extracts and returns detailed information about a video game from its Metacritic page.
+
+    This function takes the URL of a game's page on Metacritic and scrapes the page to collect
+    essential details about the game, such as its title, description, release date, genres,
+    platforms, developers, publishers, critic and user scores, and links to reviews.
+
+    Args:
+        game_page_url (str): The URL of the game's specific page on Metacritic.
+
+    Returns:
+        GameInfo: An instance of the GameInfo dataclass containing the extracted information.
+
+    Raises:
+        ValueError: If the game_page_url is not a valid Metacritic game page URL or data cannot be extracted.
+        RequestException: If there's a problem with the network request to the Metacritic page.
+        ParsingException: If there's an error parsing the page content (optional, depends on implementation).
+
+    Note:
+        This function requires internet access to fetch the page content and might be subject to
+        Metacritic's terms of use and rate limiting. Ensure compliance with Metacritic's policies
+        when using this function.
+    """
+    response = requests.get(game_page_url)
+    response.raise_for_status()
+
+    if response.status_code == 404:
+        raise requests.exceptions.HTTPError(f"Couldn't find {game_page_url}!")
+    elif response.status_code == 500:
+        raise requests.exceptions.ConnectionError("Internal server error!")
+
+    soup = BeautifulSoup(response.content, "html.parser")
+
+    try:
+        description = soup.find(
+            "div",
+            class_="c-pageProductDetails_description g-outer-spacing-bottom-xlarge",
+        ).text.strip()
+        platforms_div = soup.find(
+            "div", class_="c-gameDetails_Platforms u-flexbox u-flexbox-row"
+        )
+        platforms = [
+            platform.text.strip() for platform in platforms_div.find("ul").findAll("li")
+        ]
+        release_date = (
+            soup.find("div", class_="c-gameDetails_ReleaseDate u-flexbox u-flexbox-row")
+            .findAll("span")[1]
+            .text.strip()
+        )
+        developers_div = soup.find(
+            "div", class_="c-gameDetails_Developer u-flexbox u-flexbox-row"
+        )
+        developers = [
+            developer.text.strip() for developer in developers_div.find("ul").find("li")
+        ]
+        publishers = (
+            soup.find("div", class_="c-gameDetails_Distributor u-flexbox u-flexbox-row")
+            .findAll("span")[1]
+            .text.strip()
+        )
+        genres_div = soup.find(
+            "div",
+            class_="c-gameDetails_sectionContainer u-flexbox u-flexbox-row u-flexbox-alignBaseline",
+        )
+        genres = [
+            genre.text.strip()
+            for genre in genres_div.findAll("span", class_="c-globalButton_label")
+        ]
+    except AttributeError:
+        raise ValueError(
+            "Failed to parse the game page. The structure of the page might have changed."
+        )
+
+    return dict(
+        description=description,
+        release_date=release_date,
+        genres=genres,
+        platforms=platforms,
+        developers=developers,
+        publishers=publishers,
+    )
+
+
 def get_game_info(game_page_url: str) -> GameInfo:
     """
     Extracts and returns detailed information about a video game from its Metacritic page.
@@ -77,7 +162,53 @@ def get_game_info(game_page_url: str) -> GameInfo:
         Metacritic's terms of use and rate limiting. Ensure compliance with Metacritic's policies
         when using this function.
     """
-    return None
+    response = requests.get(game_page_url)
+    response.raise_for_status()
+
+    if response.status_code == 404:
+        raise requests.exceptions.HTTPError(f"Couldn't find {game_page_url}!")
+    elif response.status_code == 500:
+        raise requests.exceptions.ConnectionError("Internal server error!")
+
+    soup = BeautifulSoup(response.content, "html.parser")
+
+    try:
+        title = soup.find(
+            "div",
+            class_="c-productHero_title g-inner-spacing-bottom-medium g-outer-spacing-top-medium",
+        ).text.strip()
+        critics_score = int(
+            soup.find(
+                "div",
+                class_="c-productScoreInfo u-clearfix g-inner-spacing-bottom-medium",
+            )
+            .find("div", class_="c-productScoreInfo_scoreNumber u-float-right")
+            .text
+        )
+        users_score = float(
+            soup.find("div", class_="c-productScoreInfo u-clearfix")
+            .find("div", "c-productScoreInfo_scoreNumber u-float-right")
+            .text
+        )
+        critics_reviews_link = game_page_url + "/critic-reviews"
+        users_reviews_link = game_page_url + "/user-reviews"
+
+    except AttributeError:
+        raise ValueError(
+            "Failed to parse the game page. The structure of the page might have changed."
+        )
+
+    game_details = get_game_details(game_page_url + "/details")
+
+    return GameInfo(
+        title=title,
+        url=game_page_url,
+        critics_score=critics_score,
+        users_score=users_score,
+        critics_reviews_link=critics_reviews_link,
+        users_reviews_link=users_reviews_link,
+        **game_details,
+    )
 
 
 def get_game_reviews(game_reviews_endpoint: str) -> List[GameReview]:
