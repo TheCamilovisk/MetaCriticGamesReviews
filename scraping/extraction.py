@@ -1,6 +1,4 @@
-import sys
 from datetime import datetime
-from requests import JSONDecodeError
 from typing import List
 
 import requests
@@ -19,7 +17,7 @@ def get_best_games_list(n_pages: int = 1) -> List[GameURL]:
         List[GameURL]: _description_
     """
     base_url = "https://www.metacritic.com"
-    browse_path = "/browse/games/score/metascore/all/filtered"
+    browse_path = f"/browse/game/"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
     }
@@ -27,7 +25,7 @@ def get_best_games_list(n_pages: int = 1) -> List[GameURL]:
     game_urls = []
 
     for page in range(n_pages):
-        url = f"{base_url}{browse_path}?page={page}"
+        url = f"{base_url}{browse_path}?releaseYearMin=1958&releaseYearMax=2024&page={page + 1}"
         response = requests.get(url, headers=headers)
 
         if response.status_code == 404:
@@ -36,7 +34,7 @@ def get_best_games_list(n_pages: int = 1) -> List[GameURL]:
             raise requests.exceptions.ConnectionError("Internal server error!")
 
         soup = BeautifulSoup(response.content, "html.parser")
-        game_cards = soup.find_all(
+        game_cards = soup.findAll(
             "div", class_="c-finderProductCard c-finderProductCard-game"
         )
         for game_card in game_cards:
@@ -52,7 +50,6 @@ def get_best_games_list(n_pages: int = 1) -> List[GameURL]:
                         url=game_url,
                     )
                 )
-
     return game_urls
 
 
@@ -80,7 +77,11 @@ def get_game_details(game_page_url: str) -> dict:
         Metacritic's terms of use and rate limiting. Ensure compliance with Metacritic's policies
         when using this function.
     """
-    response = requests.get(game_page_url)
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+    }
+
+    response = requests.get(game_page_url, headers=headers)
     response.raise_for_status()
 
     if response.status_code == 404:
@@ -164,7 +165,10 @@ def get_game_info(game_page_url: str) -> GameInfo:
         Metacritic's terms of use and rate limiting. Ensure compliance with Metacritic's policies
         when using this function.
     """
-    response = requests.get(game_page_url)
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+    }
+    response = requests.get(game_page_url, headers=headers)
     response.raise_for_status()
 
     if response.status_code == 404:
@@ -192,15 +196,15 @@ def get_game_info(game_page_url: str) -> GameInfo:
             .find("div", "c-productScoreInfo_scoreNumber u-float-right")
             .text
         )
-        critics_reviews_link = game_page_url + "/critic-reviews"
-        users_reviews_link = game_page_url + "/user-reviews"
+        critics_reviews_link = game_page_url + "critic-reviews/"
+        users_reviews_link = game_page_url + "user-reviews/"
 
     except AttributeError:
         raise ValueError(
             "Failed to parse the game page. The structure of the page might have changed."
         )
 
-    game_details = get_game_details(game_page_url + "/details")
+    game_details = get_game_details(game_page_url + "details/")
 
     return GameInfo(
         title=title,
@@ -235,7 +239,7 @@ def get_game_reviews(game_reviews_endpoint: str) -> List[GameReview]:
         ValueError: If data from the API does not conform to the expected structure or types.
     """
     try:
-        response = requests.get(game_reviews_endpoint)
+        response = requests.get(game_reviews_endpoint, )
         response.raise_for_status()  # Raises HTTPError for bad responses
     except requests.exceptions.HTTPError as e:
         raise requests.HTTPError(f"HTTP error occurred: {e}")
