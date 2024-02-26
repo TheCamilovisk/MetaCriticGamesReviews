@@ -27,7 +27,6 @@ class GameInfo:
         publishers (List[str]): A list of publishers who published the game.
         critics_score (int): The aggregate score given by critics.
         users_score (float): The average score given by users.
-        critics_reviews_link (str): The URL to the critics' reviews page.
         users_reviews_link (str): The URL to the users' reviews page.
     """
 
@@ -41,7 +40,6 @@ class GameInfo:
     publishers: List[str]
     critics_score: int
     users_score: float
-    critics_reviews_link: str
     users_reviews_link: str
 
 
@@ -51,6 +49,7 @@ class GameReview:
     Represents a game review.
 
     Attributes:
+        title (str): The game title.
         username (str): The username of the individual who submitted the review.
         date (datetime): The date when the review was posted. Expected to be a datetime object.
         score (int): The score given to the game by the reviewer, typically on a scale from 0 to 10.
@@ -58,6 +57,7 @@ class GameReview:
         review_platform (str): The platform for which the review was written (e.g., PC, PS4, Xbox One).
     """
 
+    title: str
     username: str
     date: datetime
     score: int
