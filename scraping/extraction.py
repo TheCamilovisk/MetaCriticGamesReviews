@@ -17,9 +17,9 @@ def get_best_games_list(n_pages: int = 1) -> List[GameURL]:
         List[GameURL]: _description_
     """
     base_url = "https://www.metacritic.com"
-    browse_path = f"/browse/game/"
+    browse_path = "/browse/game/"
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"  # noqa: #501
     }
 
     game_urls = []
@@ -78,7 +78,7 @@ def get_game_details(game_page_url: str) -> dict:
         when using this function.
     """
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"  # noqa: #501
     }
 
     response = requests.get(game_page_url, headers=headers)
@@ -166,8 +166,13 @@ def get_game_info(game_page_url: str) -> GameInfo:
         when using this function.
     """
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"  # noqa: #501
     }
+
+    users_reviews_base_endpoint_template = "https://internal-prod.apigee.fandom.net/v1/xapi/reviews/metacritic/user/games/{game_id}/web?apiKey=1MOZgmNFxvmljaQR1X9KAij9Mo4xAY3u&offset=0&limit=50&filterBySentiment=all&sort=date&componentName=user-reviews&componentDisplayName=user%20Reviews&componentType=ReviewList"  # noqa: #501
+
+    domain = "https://www.metacritic.com/game/"
+
     response = requests.get(game_page_url, headers=headers)
     response.raise_for_status()
 
@@ -196,8 +201,9 @@ def get_game_info(game_page_url: str) -> GameInfo:
             .find("div", "c-productScoreInfo_scoreNumber u-float-right")
             .text
         )
-        critics_reviews_link = game_page_url + "critic-reviews/"
-        users_reviews_link = game_page_url + "user-reviews/"
+        users_reviews_link = users_reviews_base_endpoint_template.format(
+            game_id=game_page_url.removeprefix(domain).split("/")[0]
+        )
 
     except AttributeError:
         raise ValueError(
@@ -211,7 +217,6 @@ def get_game_info(game_page_url: str) -> GameInfo:
         url=game_page_url,
         critics_score=critics_score,
         users_score=users_score,
-        critics_reviews_link=critics_reviews_link,
         users_reviews_link=users_reviews_link,
         **game_details,
     )
@@ -238,8 +243,11 @@ def get_game_reviews(game_reviews_endpoint: str) -> List[GameReview]:
         JSONDecodeError: If the response from the API cannot be decoded as JSON.
         ValueError: If data from the API does not conform to the expected structure or types.
     """
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"  # noqa: #501
+    }
     try:
-        response = requests.get(game_reviews_endpoint, )
+        response = requests.get(game_reviews_endpoint, headers=headers)
         response.raise_for_status()  # Raises HTTPError for bad responses
     except requests.exceptions.HTTPError as e:
         raise requests.HTTPError(f"HTTP error occurred: {e}")
@@ -247,19 +255,21 @@ def get_game_reviews(game_reviews_endpoint: str) -> List[GameReview]:
         raise Exception(f"An error occurred: {e}")
 
     reviews_json = response.json()
+    print(reviews_json)
 
     game_reviews = []
-    for review_data in reviews_json:
+    for review_data in reviews_json["data"]["items"]:
         try:
             # Ensure all data is correctly typed
-            username = str(review_data["username"])
+            game_title = str(review_data["reviewedProduct"]["title"])
+            username = str(review_data["author"])
             date = datetime.strptime(review_data["date"], "%Y-%m-%d")
             score = int(review_data["score"])
             quote = str(review_data["quote"])
-            review_platform = str(review_data["review_platform"])
+            review_platform = str(review_data["platform"])
 
             game_reviews.append(
-                GameReview(username, date, score, quote, review_platform)
+                GameReview(game_title, username, date, score, quote, review_platform)
             )
         except (ValueError, KeyError) as e:
             raise ValueError(f"Error processing review data: {e}")
