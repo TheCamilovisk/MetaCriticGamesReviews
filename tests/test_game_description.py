@@ -34,15 +34,15 @@ class TestGetGameInfo(unittest.TestCase):
     def test_valid_game_page(self, mock_get: MagicMock) -> None:
         """Test extracting info from a valid game page URL."""
 
-        def return_sample_file_response(url):
+        def return_sample_file_response(url, headers):
             responses = {
-                "https://www.notmetacritic.com/game/valid-game": self.valid_game_html,
-                "https://www.notmetacritic.com/game/valid-game/details": self.detail_game_html,
+                "https://www.notmetacritic.com/game/valid-game/": self.valid_game_html,
+                "https://www.notmetacritic.com/game/valid-game/details/": self.detail_game_html,
             }
             return MagicMock(status_code=200, content=responses[url])
 
         mock_get.side_effect = return_sample_file_response
-        game_info = get_game_info("https://www.notmetacritic.com/game/valid-game")
+        game_info = get_game_info("https://www.notmetacritic.com/game/valid-game/")
         self.assertIsNotNone(game_info)
         self.assertIsInstance(game_info, GameInfo)
 
