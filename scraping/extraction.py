@@ -1,5 +1,4 @@
 from datetime import datetime
-from time import sleep
 from typing import Generator, List
 
 import requests
@@ -276,8 +275,6 @@ def get_game_reviews(game_reviews_endpoint: str) -> Generator[GameReview, None, 
         except (ValueError, KeyError) as e:
             raise ValueError(f"Error processing review data: {e}")
 
-    sleep(1)
     next_page = reviews_json["links"]["next"]["href"]
-    print(next_page)
     if next_page:
         yield from get_game_reviews(next_page)
