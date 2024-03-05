@@ -1,5 +1,6 @@
 from datetime import datetime
-from typing import List
+from time import sleep
+from typing import Generator, List
 
 import requests
 from bs4 import BeautifulSoup
@@ -222,7 +223,7 @@ def get_game_info(game_page_url: str) -> GameInfo:
     )
 
 
-def get_game_reviews(game_reviews_endpoint: str) -> List[GameReview]:
+def get_game_reviews(game_reviews_endpoint: str) -> Generator[GameReview, None, None]:
     """
     Fetches and returns a list of game reviews from a specified API endpoint.
 
@@ -255,10 +256,13 @@ def get_game_reviews(game_reviews_endpoint: str) -> List[GameReview]:
         raise Exception(f"An error occurred: {e}")
 
     reviews_json = response.json()
-    print(reviews_json)
 
-    game_reviews = []
-    for review_data in reviews_json["data"]["items"]:
+    try:
+        items = reviews_json["data"]["items"]
+    except TypeError as e:
+        raise ValueError(f"Error processing review data: {e}")
+
+    for review_data in items:
         try:
             # Ensure all data is correctly typed
             game_title = str(review_data["reviewedProduct"]["title"])
@@ -268,10 +272,12 @@ def get_game_reviews(game_reviews_endpoint: str) -> List[GameReview]:
             quote = str(review_data["quote"])
             review_platform = str(review_data["platform"])
 
-            game_reviews.append(
-                GameReview(game_title, username, date, score, quote, review_platform)
-            )
+            yield GameReview(game_title, username, date, score, quote, review_platform)
         except (ValueError, KeyError) as e:
             raise ValueError(f"Error processing review data: {e}")
 
-    return game_reviews
+    sleep(1)
+    next_page = reviews_json["links"]["next"]["href"]
+    print(next_page)
+    if next_page:
+        yield from get_game_reviews(next_page)
