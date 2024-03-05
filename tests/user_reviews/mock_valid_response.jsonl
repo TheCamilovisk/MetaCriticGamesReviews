@@ -1,2 +1,23 @@
-{"username": "user1", "date": "2024-01-24", "score": 10, "quote": "An amazing experience.", "review_platform": "PC"}
-{"username": "user2", "date": "2024-01-25", "score": 9, "quote": "Great game, but with a few issues.", "review_platform": "Xbox"}
+{
+    "data": {
+        "items": [
+            {
+                "author": "user1",
+                "date": "2024-01-24",
+                "score": 10,
+                "quote": "An amazing experience.",
+                "platform": "PC",
+                "reviewedProduct": {"title": "game1"}
+            },
+            {
+                "author": "user2",
+                "date": "2024-01-25",
+                "score": 8,
+                "quote": "Another experience.",
+                "platform": "Playstation 5",
+                "reviewedProduct": {"title": "game2"}
+            }
+        ]
+    },
+    "links": {"next": {"href": null}}
+}
