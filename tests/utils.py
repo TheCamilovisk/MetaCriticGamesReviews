@@ -1,7 +1,4 @@
 import os
-from typing import List
-
-import jsonlines
 
 
 def get_resources_path(test_file_name: str) -> str:
@@ -31,19 +28,4 @@ def read_file(filepath: str) -> str:
     """
     with open(filepath, "r") as file:
         content = file.read()
-    return content
-
-
-def read_jsonlines_file(filepath: str) -> List[dict]:
-    """
-    Reads a JSONLines file and returns the content as a list of dictionaries.
-
-    Args:
-        filepath (str): The path to the JSONLines file to be read.
-
-    Returns:
-        List[dict]: A list of dictionaries, where each dictionary is a JSON object from the file.
-    """
-    with jsonlines.open(filepath, "r") as file:
-        content = list(file)
     return content
